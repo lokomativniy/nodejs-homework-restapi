@@ -33,12 +33,7 @@ userSchema.methods.comparePassword = function (password) {
   return bcrypt.compareSync(password, this.password);
 };
 
-userSchema.methods.comparePassword = function (password) {
-  return bcrypt.compareSync(password, this.password);
-};
-
 const joiRegisterSchema = Joi.object({
-  name: Joi.string().required(),
   email: Joi.string().required(),
   password: Joi.string().min(6).required(),
 });
