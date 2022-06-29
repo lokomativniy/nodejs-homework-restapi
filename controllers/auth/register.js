@@ -1,6 +1,12 @@
+// const { nanoid } = require("nanoid");
+
+const { v4: uuidv4 } = require("uuid");
+
 const { User } = require("../../models");
 
 const gravatar = require("gravatar");
+
+const { sendEmail } = require("../../helpers");
 
 const register = async (req, res) => {
   const { subscription, email, password } = req.body;
@@ -11,11 +17,26 @@ const register = async (req, res) => {
 
   const avatarURL = gravatar.url(email);
 
-  const newUser = new User({ subscription, email, avatarURL });
+  const verificationToken = uuidv4();
+
+  const newUser = new User({
+    subscription,
+    email,
+    avatarURL,
+    verificationToken,
+  });
 
   newUser.setPassword(password);
 
-  newUser.save();
+  await newUser.save();
+
+  const mail = {
+    to: email,
+    subject: "Подтверждения email",
+    html: `<a target="_blank" href="http://localhost:3000/api/users/verify/${verificationToken}">Подтвердить email</a>`,
+  };
+
+  await sendEmail(mail);
 
   res.status(201).json({
     status: "success",
@@ -25,6 +46,7 @@ const register = async (req, res) => {
         email,
         subscription,
         avatarURL,
+        verificationToken,
       },
     },
   });
